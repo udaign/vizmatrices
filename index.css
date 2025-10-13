@@ -1,0 +1,8 @@
+body {
+  background-color: #000000; /* Default to dark theme */
+  transition: background-color 0.3s ease;
+}
+
+body[data-theme="light"] {
+  background-color: #f3f4f6; /* Tailwind gray-100 */
+}

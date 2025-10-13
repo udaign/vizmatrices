@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Viz Matrices">
+    <link rel="apple-touch-icon" href="images/viz-matrices-favicon.png">
+    
+    <title>Viz Matrices - Dry Run</title>
+    <link rel="icon" href="images/viz-matrices-favicon.png" type="image/png">
+    
+    <!-- Social Media/Link Sharing Meta Tags -->
+    <meta property="og:title" content="Viz Matrices - Dry Run" />
+    <meta property="og:description" content="A music visualizer that transforms sound into a captivating dance of light in the glyph matrix." />
+    <meta property="og:image" content="images/viz-matrices-preview.png" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Viz Matrices - Dry Run" />
+    <meta name="twitter:description" content="A music visualizer that transforms sound into a captivating dance of light in the glyph matrix." />
+    <meta name="twitter:image" content="images/viz-matrices-preview.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
+    <link rel="stylesheet" href="/index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Space Grotesk', 'sans-serif'],
+            },
+            colors: {
+              'brand-accent': '#d71921',
+            }
+          }
+        }
+      }
+    </script>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M4KHYHT608"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-M4KHYHT608');
+    </script>
+    <style>
+      :root {
+        --slider-track-bg: rgba(255, 255, 255, 0.3);
+        --slider-track-progress: white;
+        --slider-track-disabled-bg: rgba(107, 114, 128, 0.3);
+        --slider-track-disabled-progress: #6b7280;
+      }
+      body[data-theme="light"] {
+        --slider-track-bg: rgba(31, 41, 55, 0.3);
+        --slider-track-progress: #1f2937;
+        --slider-track-disabled-bg: rgba(156, 163, 175, 0.3);
+        --slider-track-disabled-progress: #9ca3af;
+      }
+      .custom-slider {
+        background-color: transparent;
+      }
+
+      /* Webkit Browsers (Chrome, Safari) */
+      .custom-slider::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 4px;
+        cursor: pointer;
+        background: linear-gradient(to right, var(--slider-track-progress) 0%, var(--slider-track-progress) var(--progress-percent, 0%), var(--slider-track-bg) var(--progress-percent, 0%), var(--slider-track-bg) 100%);
+        border-radius: 999px;
+      }
+      
+      .custom-slider:disabled::-webkit-slider-runnable-track {
+        background: linear-gradient(to right, var(--slider-track-disabled-progress) 0%, var(--slider-track-disabled-progress) var(--progress-percent, 0%), var(--slider-track-disabled-bg) var(--progress-percent, 0%), var(--slider-track-disabled-bg) 100%);
+      }
+
+      .custom-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 0;
+        height: 0;
+      }
+
+      /* Mozilla Firefox */
+      .custom-slider::-moz-range-track {
+        width: 100%;
+        height: 4px;
+        cursor: pointer;
+        background: linear-gradient(to right, var(--slider-track-progress) 0%, var(--slider-track-progress) var(--progress-percent, 0%), var(--slider-track-bg) var(--progress-percent, 0%), var(--slider-track-bg) 100%);
+        border-radius: 999px;
+      }
+      
+      .custom-slider:disabled::-moz-range-track {
+         background: linear-gradient(to right, var(--slider-track-disabled-progress) 0%, var(--slider-track-disabled-progress) var(--progress-percent, 0%), var(--slider-track-disabled-bg) var(--progress-percent, 0%), var(--slider-track-disabled-bg) 100%);
+      }
+
+      .custom-slider::-moz-range-thumb {
+        width: 0;
+        height: 0;
+        border: 0;
+      }
+    </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "react": "https://esm.sh/react@^19.1.1",
+    "react/": "https://esm.sh/react@^19.1.1/"
+  }
+}
+</script>
+</head>
+<body class="font-sans">
+    <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./service-worker.js')
+            .then(registration => {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            })
+            .catch(error => {
+              console.log('ServiceWorker registration failed: ', error);
+            });
+        });
+      }
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "id": "/vizmatrices/",
+  "short_name": "Viz Matrices",
+  "name": "Viz Matrices",
+  "description": "A music visualizer that transforms sound into a captivating dance of light in the glyph matrix.",
+  "icons": [
+    {
+      "src": "images/viz-matrices-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "images/viz-matrices-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "images/viz-matrices-512m.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": "/vizmatrices/",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "scope": "/vizmatrices/"
+}
