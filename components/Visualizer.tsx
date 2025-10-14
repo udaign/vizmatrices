@@ -42,8 +42,9 @@ const Visualizer: React.FC<VisualizerProps> = ({ renderBuffer, settings, pulseSi
 
     // --- RENDER FLUID SIMULATION ---
     if (!renderBuffer) {
-        ctx.clearRect(0, 0, canvasSize, canvasSize);
-        onCompositeUpdate(null);
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvasSize, canvasSize);
+        onCompositeUpdate(ctx.getImageData(0, 0, canvasSize, canvasSize));
         return;
     };
     

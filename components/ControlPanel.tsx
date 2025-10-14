@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef } from 'react';
 import { trackEvent } from '../analytics';
 import { CheckboxControl, SliderControl, ChevronIcon } from './controls/ControlPrimitives';
@@ -366,38 +367,6 @@ const ControlPanel: React.FC<ControlPanelProps> = (props) => {
                     {openSections.display && (
                         <div className="divide-y-2 divide-black" style={{ backgroundColor: isDark ? '#3c3c3c' : '#F5F5F5'}}>
                             <div className="divide-y-2 divide-black">
-                                <div className={`flex items-center justify-between py-1.5 pr-2 pl-7 ${isDark ? 'text-white' : 'text-black'}`} style={{ backgroundColor: isDark ? '#565656' : '#E0E0E0'}}>
-                                    <CheckboxControl
-                                        label="Show Angular Guides"
-                                        checked={settings.showAngularGuides}
-                                        onChange={() => handleSettingChange('showAngularGuides', !settings.showAngularGuides)}
-                                        color="cyan"
-                                    />
-                                </div>
-                                 <div className={`flex items-center justify-between py-1.5 pr-2 pl-7 ${isDark ? 'text-white' : 'text-black'}`} style={{ backgroundColor: isDark ? '#565656' : '#E0E0E0'}}>
-                                    <CheckboxControl
-                                        label="Show Quadrant Guides"
-                                        checked={settings.showQuadrantGuides}
-                                        onChange={() => handleSettingChange('showQuadrantGuides', !settings.showQuadrantGuides)}
-                                        color="magenta"
-                                    />
-                                </div>
-                                <div className={`flex items-center justify-between py-1.5 pr-2 pl-7 ${isDark ? 'text-white' : 'text-black'}`} style={{ backgroundColor: isDark ? '#565656' : '#E0E0E0'}}>
-                                    <CheckboxControl
-                                        label="Show Columns"
-                                        checked={settings.showColumnGrid}
-                                        onChange={() => handleSettingChange('showColumnGrid', !settings.showColumnGrid)}
-                                        color="rgba(239, 68, 68, 0.8)"
-                                    />
-                                </div>
-                                <div className={`flex items-center justify-between py-1.5 pr-2 pl-7 ${isDark ? 'text-white' : 'text-black'}`} style={{ backgroundColor: isDark ? '#565656' : '#E0E0E0'}}>
-                                    <CheckboxControl
-                                        label="Show Grid"
-                                        checked={settings.showBaselineGrid}
-                                        onChange={() => handleSettingChange('showBaselineGrid', !settings.showBaselineGrid)}
-                                        color={isDark ? "rgba(156, 163, 175, 0.8)" : "rgba(107, 114, 128, 0.8)"}
-                                    />
-                                </div>
                                 <div className={`flex items-center justify-between py-1.5 pr-2 pl-7 ${isDark ? 'text-white' : 'text-black'}`} style={{ backgroundColor: isDark ? '#565656' : '#E0E0E0'}}>
                                     <CheckboxControl
                                         label="Pixel Glow"

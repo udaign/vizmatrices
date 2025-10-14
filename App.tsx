@@ -15,6 +15,7 @@ import SleepTimer from './components/SleepTimer';
 import Queue from './components/Queue';
 import ColumnGrid from './components/ColumnGrid';
 import BaselineGrid from './components/BaselineGrid';
+import { SupportModal } from './components/SupportModal';
 
 // Add jsmediatags to window
 declare global {
@@ -146,6 +147,7 @@ const App: React.FC = () => {
   // Queue state
   const [isQueueOpen, setIsQueueOpen] = useState(false);
   const [selectedTracks, setSelectedTracks] = useState<Set<string>>(new Set());
+  const [showSupportModal, setShowSupportModal] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -220,6 +222,11 @@ const App: React.FC = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     trackEvent('theme_toggle', { selected_theme: newTheme });
     setTheme(newTheme);
+  };
+
+  const handleShowSupportModal = () => {
+    trackEvent('show_support_modal');
+    setShowSupportModal(true);
   };
 
   // Apply theme to body and save to localStorage
@@ -1180,6 +1187,7 @@ const App: React.FC = () => {
                 playlistLength={playlist.length}
                 theme={theme}
                 onThemeToggle={toggleTheme}
+                onShowSupportModal={handleShowSupportModal}
             />
         </div>
       </header>
@@ -1407,6 +1415,11 @@ const App: React.FC = () => {
           onPlayNextSelected={handlePlayNextSelected}
           onRemoveTrack={handleRemoveTrack}
           theme={theme}
+      />
+      <SupportModal 
+        show={showSupportModal} 
+        onClose={() => setShowSupportModal(false)} 
+        theme={theme}
       />
     </div>
   );

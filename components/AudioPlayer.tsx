@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { trackEvent } from '../analytics';
 
 type LoadMethod = 'file_select' | 'folder_select';
 
@@ -10,6 +11,7 @@ interface AudioPlayerProps {
   playlistLength: number;
   theme: 'dark' | 'light';
   onThemeToggle: () => void;
+  onShowSupportModal: () => void;
 }
 
 const formatTrackName = (name: string | null): string => {
@@ -22,7 +24,7 @@ const formatTrackName = (name: string | null): string => {
 };
 
 const AudioPlayer: React.FC<AudioPlayerProps> = ({ 
-    onFilesSelect, currentTrackName, albumArtUrl, playlistLength, theme, onThemeToggle,
+    onFilesSelect, currentTrackName, albumArtUrl, playlistLength, theme, onThemeToggle, onShowSupportModal
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -105,6 +107,15 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                       </div>
                   )}
                 </div>
+                <button
+                    onClick={onShowSupportModal}
+                    className={`p-2 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-opacity-75 ${theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-800 hover:bg-black/10'}`}
+                    aria-label="Support this project"
+                >
+                    <span className="material-symbols-rounded text-2xl">
+                        favorite
+                    </span>
+                </button>
                 <button
                     onClick={onThemeToggle}
                     className={`p-2 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-opacity-75 ${theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-800 hover:bg-black/10'}`}
