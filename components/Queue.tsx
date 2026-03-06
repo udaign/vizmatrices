@@ -37,6 +37,7 @@ const Queue: React.FC<QueueProps> = ({
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
     const panelRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef<HTMLDivElement>(null);
     const moreMenuRef = useRef<HTMLDivElement>(null);
     const isDark = theme === 'dark';
     const allSelected = selectedTracks.size > 0 && selectedTracks.size === playlist.length;
@@ -64,6 +65,20 @@ const Queue: React.FC<QueueProps> = ({
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen, onClose, isMoreMenuOpen]);
+
+    // Auto-scroll to the now-playing track when the queue opens
+    useEffect(() => {
+        if (isOpen && listRef.current && currentTrackIndex >= 0) {
+            requestAnimationFrame(() => {
+                const container = listRef.current;
+                if (!container) return;
+                const currentItem = container.children[currentTrackIndex] as HTMLElement | undefined;
+                if (currentItem) {
+                    container.scrollTop = currentItem.offsetTop - container.offsetTop;
+                }
+            });
+        }
+    }, [isOpen]);
     
     const handleDragStart = (index: number) => {
         setDraggedIndex(index);
@@ -113,7 +128,7 @@ const Queue: React.FC<QueueProps> = ({
                 </div>
             </div>
             {/* List */}
-            <div className="overflow-y-auto" onDragEnd={handleDragEnd}>
+            <div ref={listRef} className="overflow-y-auto" onDragEnd={handleDragEnd}>
                 {playlist.map((track, index) => (
                     <QueueItem
                         key={track.url}
