@@ -40,6 +40,8 @@ const Queue: React.FC<QueueProps> = ({
     const moreMenuRef = useRef<HTMLDivElement>(null);
     const isDark = theme === 'dark';
     const allSelected = selectedTracks.size > 0 && selectedTracks.size === playlist.length;
+    const someSelected = selectedTracks.size > 0 && selectedTracks.size < playlist.length;
+    const noneSelected = selectedTracks.size === 0;
     
     useEffect(() => {
         const handleEsc = (event: KeyboardEvent) => {
@@ -90,8 +92,9 @@ const Queue: React.FC<QueueProps> = ({
             <div className={`flex items-center p-3 border-b ${isDark ? 'border-white/10' : 'border-black/10'} flex-shrink-0`}>
                 <div className="flex-1 flex justify-start items-center gap-3">
                     <button onClick={onClose} className="p-1 rounded-full hover:bg-white/10 w-10 h-10 flex items-center justify-center"><span className="material-symbols-rounded">close</span></button>
-                    <button onClick={onSelectAll} className={`w-6 h-6 border-2 rounded-full flex items-center justify-center transition-colors ${allSelected ? 'border-brand-accent bg-brand-accent' : (isDark ? 'border-gray-400' : 'border-gray-600')}`} aria-label="Select All">
+                    <button onClick={onSelectAll} className={`w-6 h-6 border-2 rounded-full flex items-center justify-center transition-colors ${noneSelected ? (isDark ? 'border-gray-400' : 'border-gray-600') : 'border-brand-accent bg-brand-accent'}`} aria-label={noneSelected ? 'Select All' : 'Deselect All'}>
                         {allSelected && <span className="material-symbols-rounded text-base text-white">check</span>}
+                        {someSelected && <span className="material-symbols-rounded text-base text-white">check</span>}
                     </button>
                 </div>
                 <h2 className="text-xl font-bold">Queue</h2>

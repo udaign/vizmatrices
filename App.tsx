@@ -1028,7 +1028,7 @@ const App: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-      if (selectedTracks.size === playlist.length) {
+      if (selectedTracks.size > 0) {
           setSelectedTracks(new Set());
       } else {
           setSelectedTracks(new Set(playlist.map(t => t.url)));
