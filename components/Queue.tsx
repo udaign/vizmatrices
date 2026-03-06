@@ -10,7 +10,7 @@ interface QueueProps {
     currentTrackIndex: number;
     onReorder: (startIndex: number, endIndex: number) => void;
     selectedTracks: Set<string>;
-    onSelectTrack: (trackUrl: string) => void;
+    onSelectTrack: (trackUrl: string, isShiftPressed: boolean) => void;
     onSelectAll: () => void;
     onDeleteSelected: () => void;
     onPlayTrack: (trackIndex: number) => void;
@@ -119,7 +119,7 @@ const Queue: React.FC<QueueProps> = ({
                         isCurrent={index === currentTrackIndex}
                         isSelected={selectedTracks.has(track.url)}
                         isDragged={draggedIndex === index}
-                        onSelect={() => onSelectTrack(track.url)}
+                        onSelect={(e) => onSelectTrack(track.url, e.shiftKey)}
                         onPlay={() => onPlayTrack(index)}
                         onDragStart={() => handleDragStart(index)}
                         onDragEnter={() => handleDragEnter(index)}

@@ -147,6 +147,7 @@ const App: React.FC = () => {
   // Queue state
   const [isQueueOpen, setIsQueueOpen] = useState(false);
   const [selectedTracks, setSelectedTracks] = useState<Set<string>>(new Set());
+  const lastSelectedTrackUrlRef = useRef<string | null>(null);
   const [showSupportModal, setShowSupportModal] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -726,6 +727,10 @@ const App: React.FC = () => {
     trackEvent(`track_${action}`, { method });
     setIsPlaying(!isPlaying);
   }, [hasPlaylist, isPlaying, setIsPlaying]);
+  const handleToggleQueue = useCallback(() => {
+      trackEvent('toggle_queue', { opened: !isQueueOpen });
+      setIsQueueOpen(prev => !prev);
+  }, [isQueueOpen]);
 
   useEffect(() => {
     const handleKeyboardShortcuts = (event: KeyboardEvent) => {
@@ -759,6 +764,10 @@ const App: React.FC = () => {
       if (event.key === ' ' || event.code === 'Space') {
         event.preventDefault(); // Prevent default action (like scrolling or activating a focused button)
         togglePlayPause('keyboard');
+      }
+      if (event.key.toLowerCase() === 'q') {
+        event.preventDefault();
+        handleToggleQueue();
       }
       if (event.key === '0' || event.code === 'Numpad0') {
         event.preventDefault();
@@ -805,7 +814,7 @@ const App: React.FC = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyboardShortcuts);
     };
-  }, [togglePlayPause, duration, handleShuffleToggle, handleRepeatToggle, handlePlayNext, handlePlayPrevious]);
+  }, [togglePlayPause, duration, handleShuffleToggle, handleRepeatToggle, handlePlayNext, handlePlayPrevious, handleToggleQueue]);
   
   const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (audioRef.current) {
@@ -985,12 +994,27 @@ const App: React.FC = () => {
         }
     };
 
-  const handleToggleQueue = () => {
-      trackEvent('toggle_queue', { opened: !isQueueOpen });
-      setIsQueueOpen(prev => !prev);
-  };
+  const handleSelectTrack = (trackUrl: string, isShiftPressed: boolean) => {
+      if (isShiftPressed && lastSelectedTrackUrlRef.current) {
+          const startIdx = playlist.findIndex(t => t.url === lastSelectedTrackUrlRef.current);
+          const endIdx = playlist.findIndex(t => t.url === trackUrl);
+          
+          if (startIdx !== -1 && endIdx !== -1) {
+              const minIdx = Math.min(startIdx, endIdx);
+              const maxIdx = Math.max(startIdx, endIdx);
+              
+              setSelectedTracks(prev => {
+                  const newSelection = new Set(prev);
+                  for (let i = minIdx; i <= maxIdx; i++) {
+                      newSelection.add(playlist[i].url);
+                  }
+                  return newSelection;
+              });
+              lastSelectedTrackUrlRef.current = trackUrl;
+              return;
+          }
+      }
 
-  const handleSelectTrack = (trackUrl: string) => {
       setSelectedTracks(prev => {
           const newSelection = new Set(prev);
           if (newSelection.has(trackUrl)) {
@@ -1000,6 +1024,7 @@ const App: React.FC = () => {
           }
           return newSelection;
       });
+      lastSelectedTrackUrlRef.current = trackUrl;
   };
 
   const handleSelectAll = () => {
@@ -1034,6 +1059,7 @@ const App: React.FC = () => {
       setOriginalPlaylist(newOriginalPlaylist);
       setCurrentTrackIndex(newTrackIndex);
       setSelectedTracks(new Set());
+      lastSelectedTrackUrlRef.current = null;
 
       if (newPlaylist.length === 0) {
           setIsPlaying(false);
@@ -1096,6 +1122,7 @@ const App: React.FC = () => {
       }
       
       setSelectedTracks(new Set()); // Clear selection
+      lastSelectedTrackUrlRef.current = null;
   };
   
   const handleRemoveTrack = (trackUrlToRemove: string) => {
@@ -1125,6 +1152,9 @@ const App: React.FC = () => {
           newSelection.delete(trackUrlToRemove);
           return newSelection;
       });
+      if (lastSelectedTrackUrlRef.current === trackUrlToRemove) {
+          lastSelectedTrackUrlRef.current = null;
+      }
   };
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;

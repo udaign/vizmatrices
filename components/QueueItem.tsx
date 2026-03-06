@@ -8,7 +8,7 @@ interface QueueItemProps {
     isCurrent: boolean;
     isSelected: boolean;
     isDragged: boolean;
-    onSelect: () => void;
+    onSelect: (e: React.MouseEvent) => void;
     onPlay: () => void;
     onDragStart: () => void;
     onDragEnter: () => void;
@@ -119,7 +119,7 @@ const QueueItem: React.FC<QueueItemProps> = ({
                 className={`w-6 h-6 border-2 rounded-full flex-shrink-0 flex items-center justify-center transition-colors ${isSelected ? 'border-brand-accent bg-brand-accent' : (isDark ? 'border-gray-400' : 'border-gray-600')}`}
                 onClick={(e) => {
                     e.stopPropagation();
-                    onSelect();
+                    onSelect(e);
                 }}
                  onTouchStart={(e) => e.stopPropagation()}
             >
