@@ -14,6 +14,7 @@ interface QueueItemProps {
     onDragEnter: () => void;
     onRemove: () => void;
     theme: 'dark' | 'light';
+    isSearchFocused?: boolean;
 }
 
 const formatTrackName = (name: string | null): string => {
@@ -32,6 +33,7 @@ const QueueItem: React.FC<QueueItemProps> = ({
     onDragEnter,
     onRemove,
     theme,
+    isSearchFocused = false,
 }) => {
     const isDark = theme === 'dark';
     const itemRef = useRef<HTMLDivElement>(null);
@@ -88,15 +90,17 @@ const QueueItem: React.FC<QueueItemProps> = ({
         onPlay();
     };
 
-    const baseClasses = `flex items-center gap-3 p-3 cursor-pointer select-none`;
+    const baseClasses = `flex items-center gap-3 p-3 cursor-pointer select-none transition-colors`;
     const themeClasses = isDark ? 'hover:bg-white/10' : 'hover:bg-black/10';
     const currentClasses = isCurrent ? (isDark ? 'bg-white/20' : 'bg-black/20') : '';
     const draggedClasses = isDragged ? 'opacity-50' : '';
+    // Search-focused row gets the same style as hover
+    const focusedClass = isSearchFocused ? (isDark ? 'bg-white/10' : 'bg-black/10') : '';
 
     return (
         <div
             ref={itemRef}
-            className={`${baseClasses} ${themeClasses} ${currentClasses} ${draggedClasses}`}
+            className={`${baseClasses} ${themeClasses} ${currentClasses} ${draggedClasses} ${focusedClass}`}
             style={{ transform: `translateX(${translateX}px)` }}
             draggable
             onDragStart={onDragStart}
@@ -109,8 +113,8 @@ const QueueItem: React.FC<QueueItemProps> = ({
         >
             <span
                 className={`cursor-grab touch-none ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
-                onMouseDown={(e) => e.stopPropagation()} // Prevent playing when grabbing handle
-                onTouchStart={(e) => e.stopPropagation()} // Prevent swipe from starting on handle
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
             >
                 <span className="material-symbols-rounded">drag_indicator</span>
             </span>
