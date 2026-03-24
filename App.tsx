@@ -482,12 +482,14 @@ const App: React.FC = () => {
 
     setOriginalPlaylist(newPlaylistWithoutArt);
 
+    let initialPlaylist = newPlaylistWithoutArt;
     if (shuffle) {
       const shuffled = [...newPlaylistWithoutArt];
       for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
+      initialPlaylist = shuffled;
       setPlaylist(shuffled);
     } else {
         setPlaylist(newPlaylistWithoutArt);
@@ -507,11 +509,40 @@ const App: React.FC = () => {
       setIsPlaying(true);
     }, 0);
 
-    // Asynchronously load metadata one by one to avoid blocking the main thread
-    const processMetadataQueue = async (filesToProcess: File[]) => {
-        for (const [index, file] of filesToProcess.entries()) {
+    // Prioritize loading metadata for the order it will be played
+    const itemsToProcess = initialPlaylist.map(track => {
+        const originalIndex = newPlaylistWithoutArt.findIndex(t => t.url === track.url);
+        return { file: audioFiles[originalIndex], url: track.url };
+    });
+
+    // Asynchronously load metadata batched to avoid blocking the main thread
+    const processMetadataQueue = async (queueItems: { file: File, url: string }[]) => {
+        let updateBatch: Record<string, Partial<PlaylistItem>> = {};
+        let batchCount = 0;
+        let totalProcessed = 0;
+
+        const flushBatch = () => {
+            if (Object.keys(updateBatch).length === 0) return;
+            
+            const batchToFlush = { ...updateBatch };
+            updateBatch = {};
+            batchCount = 0;
+
+            const applyUpdates = (track: PlaylistItem) => {
+                const updates = batchToFlush[track.url];
+                if (updates) {
+                    return { ...track, ...updates };
+                }
+                return track;
+            };
+
+            setPlaylist(current => current.map(applyUpdates));
+            setOriginalPlaylist(current => current.map(applyUpdates));
+        };
+
+        for (const item of queueItems) {
             try {
-                const metadata = await parseBlob(file);
+                const metadata = await parseBlob(item.file);
                 const { title, artist, album, picture } = metadata.common;
 
                 let albumArtUrl: string | undefined = undefined;
@@ -520,27 +551,27 @@ const App: React.FC = () => {
                     const blob = new Blob([new Uint8Array(pic.data)], { type: pic.format });
                     albumArtUrl = URL.createObjectURL(blob);
                 }
-                const fileUrl = newPlaylistWithoutArt[index].url; // Stable URL from initial list
 
-                const updateWithMetadata = (track: PlaylistItem) => {
-                    if (track.url === fileUrl) {
-                        return { ...track, title: title || undefined, albumArtUrl, artist, album };
-                    }
-                    return track;
-                };
+                updateBatch[item.url] = { title: title || undefined, albumArtUrl, artist, album };
+                batchCount++;
+                totalProcessed++;
 
-                // Update state using functional updates to get the latest state
-                setPlaylist(current => current.map(updateWithMetadata));
-                setOriginalPlaylist(current => current.map(updateWithMetadata));
+                // Flush immediately for the first 3 items (fast UI for currently playing), then batch every 15 items
+                if (totalProcessed <= 3 || batchCount >= 15) {
+                    flushBatch();
+                }
             } catch (error) {
-                console.log(`Could not read metadata for ${file.name}:`, error);
+                console.log(`Could not read metadata for ${item.file.name}:`, error);
             }
             // Yield to the main thread after processing each file to keep UI responsive
             await new Promise(resolve => setTimeout(resolve, 0));
         }
+        
+        // Final flush for any remaining items
+        flushBatch();
     };
 
-    processMetadataQueue(audioFiles);
+    processMetadataQueue(itemsToProcess);
   };
   
   useEffect(() => {
