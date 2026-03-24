@@ -132,12 +132,18 @@ const Queue: React.FC<QueueProps> = ({
     }, []);
     
     useEffect(() => {
-        const handleEsc = (event: KeyboardEvent) => {
+        const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
                 if (isSearchOpen) {
                     closeSearch();
                 } else {
                     onClose();
+                }
+            } else if (event.shiftKey && event.key === 'ArrowUp') {
+                if (selectedTracks.size > 0) {
+                    event.preventDefault();
+                    onPlayNextSelected();
+                    setIsMoreMenuOpen(false);
                 }
             }
         };
@@ -148,14 +154,14 @@ const Queue: React.FC<QueueProps> = ({
         };
 
         if (isOpen) {
-            window.addEventListener('keydown', handleEsc);
+            window.addEventListener('keydown', handleKeyDown);
             document.addEventListener('mousedown', handleClickOutside);
         }
         return () => {
-            window.removeEventListener('keydown', handleEsc);
+            window.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isOpen, onClose, isMoreMenuOpen, isSearchOpen]);
+    }, [isOpen, onClose, isMoreMenuOpen, isSearchOpen, selectedTracks.size, onPlayNextSelected]);
 
     // Auto-scroll to the now-playing track when the queue opens
     useEffect(() => {
