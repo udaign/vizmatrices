@@ -4,6 +4,7 @@ import AudioPlayer from './components/AudioPlayer';
 import WaveformContainer from './components/analysis/WaveformContainer';
 import ControlPanel from './components/ControlPanel';
 import { trackEvent } from './analytics';
+import { parseBlob } from 'music-metadata';
 import RippleEngine from './components/engines/RippleEngine';
 import ShooterEngine from './components/engines/ShooterEngine';
 import PixelMatrix from './components/PixelMatrix';
@@ -17,12 +18,7 @@ import ColumnGrid from './components/ColumnGrid';
 import BaselineGrid from './components/BaselineGrid';
 import { SupportModal } from './components/SupportModal';
 
-// Add jsmediatags to window
-declare global {
-  interface Window {
-    jsmediatags: any;
-  }
-}
+
 
 interface AnalyserNodes {
   bass: AnalyserNode;
@@ -39,6 +35,7 @@ interface FrequencyMuteState {
 export interface PlaylistItem {
     url: string;
     name: string;
+    title?: string;
     albumArtUrl?: string;
     artist?: string;
     album?: string;
@@ -513,23 +510,21 @@ const App: React.FC = () => {
     // Asynchronously load metadata one by one to avoid blocking the main thread
     const processMetadataQueue = async (filesToProcess: File[]) => {
         for (const [index, file] of filesToProcess.entries()) {
-            if (!window.jsmediatags) continue;
             try {
-                const tag = await new Promise((resolve, reject) => {
-                    window.jsmediatags.read(file, { onSuccess: resolve, onError: reject });
-                });
+                const metadata = await parseBlob(file);
+                const { title, artist, album, picture } = metadata.common;
 
-                const { picture, artist, album } = (tag as any).tags;
                 let albumArtUrl: string | undefined = undefined;
-                if (picture) {
-                    const blob = new Blob([new Uint8Array(picture.data)], { type: picture.format });
+                if (picture && picture.length > 0) {
+                    const pic = picture[0];
+                    const blob = new Blob([new Uint8Array(pic.data)], { type: pic.format });
                     albumArtUrl = URL.createObjectURL(blob);
                 }
                 const fileUrl = newPlaylistWithoutArt[index].url; // Stable URL from initial list
 
                 const updateWithMetadata = (track: PlaylistItem) => {
                     if (track.url === fileUrl) {
-                        return { ...track, albumArtUrl, artist, album };
+                        return { ...track, title: title || undefined, albumArtUrl, artist, album };
                     }
                     return track;
                 };
@@ -1213,6 +1208,7 @@ const App: React.FC = () => {
             <AudioPlayer
                 onFilesSelect={handleFilesSelect}
                 currentTrackName={playlist[currentTrackIndex]?.name || null}
+                currentTrackTitle={playlist[currentTrackIndex]?.title || null}
                 albumArtUrl={playlist[currentTrackIndex]?.albumArtUrl || null}
                 playlistLength={playlist.length}
                 theme={theme}

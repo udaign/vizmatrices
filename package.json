@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "music-metadata": "^11.12.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

@@ -64,7 +64,7 @@ const Queue: React.FC<QueueProps> = ({
         const indices: number[] = [];
         playlist.forEach((track, idx) => {
             const haystack = [
-                formatTrackName(track.name),
+                track.title || formatTrackName(track.name),
                 track.artist || '',
                 track.album || '',
             ].join(' ').toLowerCase();

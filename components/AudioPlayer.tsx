@@ -7,6 +7,7 @@ type LoadMethod = 'file_select' | 'folder_select';
 interface AudioPlayerProps {
   onFilesSelect: (files: FileList, method: LoadMethod) => void;
   currentTrackName: string | null;
+  currentTrackTitle: string | null;
   albumArtUrl: string | null;
   playlistLength: number;
   theme: 'dark' | 'light';
@@ -24,7 +25,7 @@ const formatTrackName = (name: string | null): string => {
 };
 
 const AudioPlayer: React.FC<AudioPlayerProps> = ({ 
-    onFilesSelect, currentTrackName, albumArtUrl, playlistLength, theme, onThemeToggle, onShowSupportModal
+    onFilesSelect, currentTrackName, currentTrackTitle, albumArtUrl, playlistLength, theme, onThemeToggle, onShowSupportModal
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -70,7 +71,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                     )}
                 </div>
                 <p className={`min-w-0 text-sm truncate ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
-                    {formatTrackName(currentTrackName)}
+                    {currentTrackTitle || formatTrackName(currentTrackName)}
                 </p>
             </div>
 

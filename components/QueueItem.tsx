@@ -140,7 +140,7 @@ const QueueItem: React.FC<QueueItemProps> = ({
 
             <div className="min-w-0 flex-grow">
                 <p className={`font-medium truncate ${isCurrent ? 'text-brand-accent' : (isDark ? 'text-gray-200' : 'text-gray-800')}`}>
-                    {formatTrackName(track.name)}
+                    {track.title || formatTrackName(track.name)}
                 </p>
                 <p className={`text-sm truncate ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     {track.artist || 'Unknown Artist'}
