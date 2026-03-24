@@ -764,6 +764,12 @@ const App: React.FC = () => {
         event.preventDefault();
         handleToggleQueue();
       }
+      if (event.key.toLowerCase() === 'i') {
+        event.preventDefault();
+        if (pipSupported) {
+          setPipEnabled(prev => !prev);
+        }
+      }
       if (event.key === '0' || event.code === 'Numpad0') {
         event.preventDefault();
         if (audioRef.current) {
@@ -809,7 +815,7 @@ const App: React.FC = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyboardShortcuts);
     };
-  }, [togglePlayPause, duration, handleShuffleToggle, handleRepeatToggle, handlePlayNext, handlePlayPrevious, handleToggleQueue]);
+  }, [togglePlayPause, duration, handleShuffleToggle, handleRepeatToggle, handlePlayNext, handlePlayPrevious, handleToggleQueue, pipSupported]);
   
   const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (audioRef.current) {
