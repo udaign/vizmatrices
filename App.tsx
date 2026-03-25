@@ -815,7 +815,7 @@ const App: React.FC = () => {
         event.preventDefault();
         toggleTheme();
       }
-      if (event.key === '?') {
+      if (event.key === '?' || event.key === '/' || event.code === 'Slash') {
         event.preventDefault();
         setShowKeyboardShortcutsModal(prev => !prev);
       }
