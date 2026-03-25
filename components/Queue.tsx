@@ -154,6 +154,9 @@ const Queue: React.FC<QueueProps> = ({
                     onPlayNextSelected();
                     setIsMoreMenuOpen(false);
                 }
+            } else if (event.ctrlKey && (event.key === 'a' || event.code === 'KeyA')) {
+                event.preventDefault();
+                onSelectAll();
             }
         };
         const handleClickOutside = (event: MouseEvent) => {

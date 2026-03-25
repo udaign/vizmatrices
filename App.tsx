@@ -17,6 +17,7 @@ import Queue from './components/Queue';
 import ColumnGrid from './components/ColumnGrid';
 import BaselineGrid from './components/BaselineGrid';
 import { SupportModal } from './components/SupportModal';
+import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
 
 
 
@@ -146,6 +147,7 @@ const App: React.FC = () => {
   const [selectedTracks, setSelectedTracks] = useState<Set<string>>(new Set());
   const lastSelectedTrackUrlRef = useRef<string | null>(null);
   const [showSupportModal, setShowSupportModal] = useState(false);
+  const [showKeyboardShortcutsModal, setShowKeyboardShortcutsModal] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -801,6 +803,32 @@ const App: React.FC = () => {
           setPipEnabled(prev => !prev);
         }
       }
+      if (event.key.toLowerCase() === 'f') {
+        event.preventDefault();
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          document.documentElement.requestFullscreen();
+        }
+      }
+      if (event.key.toLowerCase() === 't') {
+        event.preventDefault();
+        toggleTheme();
+      }
+      if (event.key === '?') {
+        event.preventDefault();
+        setShowKeyboardShortcutsModal(prev => !prev);
+      }
+      if (event.key === 'Escape') {
+        if (showKeyboardShortcutsModal) {
+          setShowKeyboardShortcutsModal(false);
+        } else if (showSupportModal) {
+          setShowSupportModal(false);
+        } else if (isSleepTimerMenuOpen) {
+          setIsSleepTimerMenuOpen(false);
+        }
+        return;
+      }
       if (event.key === '0' || event.code === 'Numpad0') {
         event.preventDefault();
         if (audioRef.current) {
@@ -846,7 +874,7 @@ const App: React.FC = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyboardShortcuts);
     };
-  }, [togglePlayPause, duration, handleShuffleToggle, handleRepeatToggle, handlePlayNext, handlePlayPrevious, handleToggleQueue, pipSupported]);
+  }, [togglePlayPause, duration, handleShuffleToggle, handleRepeatToggle, handlePlayNext, handlePlayPrevious, handleToggleQueue, pipSupported, toggleTheme, showKeyboardShortcutsModal, showSupportModal, isSleepTimerMenuOpen]);
   
   const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (audioRef.current) {
@@ -1251,6 +1279,7 @@ const App: React.FC = () => {
                 theme={theme}
                 onThemeToggle={toggleTheme}
                 onShowSupportModal={handleShowSupportModal}
+                onShowKeyboardShortcuts={() => setShowKeyboardShortcutsModal(true)}
             />
         </div>
       </header>
@@ -1482,6 +1511,11 @@ const App: React.FC = () => {
       <SupportModal 
         show={showSupportModal} 
         onClose={() => setShowSupportModal(false)} 
+        theme={theme}
+      />
+      <KeyboardShortcutsModal
+        show={showKeyboardShortcutsModal}
+        onClose={() => setShowKeyboardShortcutsModal(false)}
         theme={theme}
       />
     </div>
