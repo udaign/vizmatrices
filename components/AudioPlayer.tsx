@@ -108,9 +108,20 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                       </div>
                   )}
                 </div>
+                <a
+                    href="https://nothing.community/d/44522"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`p-2 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-opacity-75 flex items-center justify-center ${theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-800 hover:bg-black/10'}`}
+                    aria-label="Community Forums"
+                >
+                    <span className="material-symbols-rounded text-2xl">
+                        forum
+                    </span>
+                </a>
                 <button
                     onClick={onShowSupportModal}
-                    className={`p-2 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-opacity-75 ${theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-800 hover:bg-black/10'}`}
+                    className={`p-2 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-opacity-75 flex items-center justify-center ${theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-800 hover:bg-black/10'}`}
                     aria-label="Support this project"
                 >
                     <span className="material-symbols-rounded text-2xl">
