@@ -1278,14 +1278,12 @@ const App: React.FC = () => {
                 playlistLength={playlist.length}
                 theme={theme}
                 onThemeToggle={toggleTheme}
-                onShowSupportModal={handleShowSupportModal}
-                onShowKeyboardShortcuts={() => setShowKeyboardShortcutsModal(true)}
             />
         </div>
       </header>
 
       {/* Floating Player Controls */}
-      <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-4">
+      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-4">
           {hasPlaylist && (
               <div className={`relative w-14 h-14 shadow-2xl ${isDark ? 'shadow-black/50' : 'shadow-gray-400/50'} rounded-full border ${isDark ? 'border-white/10' : 'border-black/10'}`}>
                   <div className={`absolute inset-0 rounded-full ${isDark ? 'bg-black/60' : 'bg-white/60'}`}></div>
@@ -1402,6 +1400,34 @@ const App: React.FC = () => {
                       disabled={!hasPlaylist}
                   />
                   <span className={`font-mono text-sm w-12 ${isDark ? 'text-gray-400' : 'text-gray-600'} text-center`}>{formatTime(isNaN(duration) ? 0 : duration)}</span>
+              </div>
+          </div>
+          
+          <div className={`border-t ${isDark ? 'border-white/10' : 'border-black/10'}`}>
+              <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} flex items-center justify-center`}>
+                      <p className="flex items-center justify-center flex-wrap gap-x-3">
+                          <button onClick={() => setShowKeyboardShortcutsModal(true)} className={`underline underline-offset-2 transition-colors duration-200 focus:outline-none ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
+                              Keyboard Shortcuts
+                          </button>
+                          <span>|</span>
+                          <a href="https://nothing.community/d/44522" target="_blank" rel="noopener noreferrer" className={`underline underline-offset-2 transition-colors duration-200 focus:outline-none ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
+                              Feedback
+                          </a>
+                          <span>|</span>
+                          <a href="mailto:udaybhaskar2283@gmail.com" className={`underline underline-offset-2 transition-colors duration-200 focus:outline-none ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
+                              Email
+                          </a>
+                          <span>|</span>
+                          <button onClick={() => setShowSupportModal(true)} className={`underline underline-offset-2 transition-colors duration-200 focus:outline-none ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
+                              Support ❤️
+                          </button>
+                          <span>|</span>
+                          <a href="https://nothing.community/u/Udaign" target="_blank" rel="noopener noreferrer" className={`underline underline-offset-2 transition-colors duration-200 focus:outline-none ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
+                              © Uday
+                          </a>
+                      </p>
+                  </div>
               </div>
           </div>
       </div>

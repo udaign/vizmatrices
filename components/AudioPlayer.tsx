@@ -12,8 +12,6 @@ interface AudioPlayerProps {
   playlistLength: number;
   theme: 'dark' | 'light';
   onThemeToggle: () => void;
-  onShowSupportModal: () => void;
-  onShowKeyboardShortcuts: () => void;
 }
 
 const formatTrackName = (name: string | null): string => {
@@ -26,7 +24,7 @@ const formatTrackName = (name: string | null): string => {
 };
 
 const AudioPlayer: React.FC<AudioPlayerProps> = ({ 
-    onFilesSelect, currentTrackName, currentTrackTitle, albumArtUrl, playlistLength, theme, onThemeToggle, onShowSupportModal, onShowKeyboardShortcuts
+    onFilesSelect, currentTrackName, currentTrackTitle, albumArtUrl, playlistLength, theme, onThemeToggle
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -109,15 +107,6 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                       </div>
                   )}
                 </div>
-                <button
-                    onClick={onShowKeyboardShortcuts}
-                    className={`hidden lg:flex p-2 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-opacity-75 items-center justify-center ${theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-800 hover:bg-black/10'}`}
-                    aria-label="Keyboard shortcuts"
-                >
-                    <span className="material-symbols-rounded text-2xl">
-                        keyboard
-                    </span>
-                </button>
                 <a
                     href="https://nothing.community/d/44522"
                     target="_blank"
@@ -129,15 +118,6 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                         forum
                     </span>
                 </a>
-                <button
-                    onClick={onShowSupportModal}
-                    className={`p-2 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-opacity-75 flex items-center justify-center ${theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-800 hover:bg-black/10'}`}
-                    aria-label="Support this project"
-                >
-                    <span className="material-symbols-rounded text-2xl">
-                        favorite
-                    </span>
-                </button>
                 <button
                     onClick={onThemeToggle}
                     className={`p-2 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-opacity-75 ${theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-800 hover:bg-black/10'}`}
