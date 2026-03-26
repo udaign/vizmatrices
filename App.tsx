@@ -1432,7 +1432,7 @@ const App: React.FC = () => {
           </div>
       </div>
     
-      <main className="py-8 px-4 sm:px-6 lg:px-8 space-y-12">
+      <main className="pt-8 pb-20 px-4 sm:px-6 lg:px-8 space-y-12">
         <section aria-labelledby="visualizer-heading" className="max-w-screen-2xl mx-auto">
              <h2 id="visualizer-heading" className="sr-only">Music Visualizers and Controls</h2>
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12 items-start">
