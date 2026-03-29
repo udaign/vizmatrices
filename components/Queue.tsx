@@ -11,7 +11,8 @@ interface QueueProps {
     onReorder: (startIndex: number, endIndex: number) => void;
     selectedTracks: Set<string>;
     onSelectTrack: (trackUrl: string, isShiftPressed: boolean) => void;
-    onSelectAll: () => void;
+    onSelectAll: (specificUrls?: string[]) => void;
+    onDeselectAll: () => void;
     onDeleteSelected: () => void;
     onPlayTrack: (trackIndex: number) => void;
     onPlayNextSelected: () => void;
@@ -34,6 +35,7 @@ const Queue: React.FC<QueueProps> = ({
     selectedTracks,
     onSelectTrack,
     onSelectAll,
+    onDeselectAll,
     onDeleteSelected,
     onPlayTrack,
     onPlayNextSelected,
@@ -156,7 +158,16 @@ const Queue: React.FC<QueueProps> = ({
                 }
             } else if (event.ctrlKey && (event.key === 'a' || event.code === 'KeyA')) {
                 event.preventDefault();
-                onSelectAll();
+                if (isSearchOpen && searchQuery.trim()) {
+                    if (matchingIndices.length > 0) {
+                        onSelectAll(matchingIndices.map(idx => playlist[idx].url));
+                    }
+                } else {
+                    onSelectAll();
+                }
+            } else if (event.ctrlKey && (event.key === 'd' || event.code === 'KeyD')) {
+                event.preventDefault();
+                onDeselectAll();
             }
         };
         const handleClickOutside = (event: MouseEvent) => {

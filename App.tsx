@@ -1087,12 +1087,33 @@ const App: React.FC = () => {
       lastSelectedTrackUrlRef.current = trackUrl;
   };
 
-  const handleSelectAll = () => {
-      if (selectedTracks.size > 0) {
-          setSelectedTracks(new Set());
+  const handleSelectAll = (specificUrls?: string[] | React.MouseEvent) => {
+      if (Array.isArray(specificUrls) && specificUrls.length > 0) {
+          const allSpecificSelected = specificUrls.every(url => selectedTracks.has(url));
+          if (allSpecificSelected) {
+              setSelectedTracks(prev => {
+                  const newSet = new Set(prev);
+                  specificUrls.forEach(url => newSet.delete(url));
+                  return newSet;
+              });
+          } else {
+              setSelectedTracks(prev => {
+                  const newSet = new Set(prev);
+                  specificUrls.forEach(url => newSet.add(url));
+                  return newSet;
+              });
+          }
       } else {
-          setSelectedTracks(new Set(playlist.map(t => t.url)));
+          if (selectedTracks.size > 0) {
+              setSelectedTracks(new Set());
+          } else {
+              setSelectedTracks(new Set(playlist.map(t => t.url)));
+          }
       }
+  };
+
+  const handleDeselectAll = () => {
+      setSelectedTracks(new Set());
   };
 
   const handleDeleteSelected = () => {
@@ -1528,6 +1549,7 @@ const App: React.FC = () => {
           selectedTracks={selectedTracks}
           onSelectTrack={handleSelectTrack}
           onSelectAll={handleSelectAll}
+          onDeselectAll={handleDeselectAll}
           onDeleteSelected={handleDeleteSelected}
           onPlayTrack={handlePlayTrack}
           onPlayNextSelected={handlePlayNextSelected}

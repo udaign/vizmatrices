@@ -45,6 +45,7 @@ const shortcutGroups: ShortcutGroup[] = [
         shortcuts: [
             { keys: ['Q'], action: 'Open / Close Queue' },
             { keys: ['Ctrl', 'A'], action: 'Select / Deselect All' },
+            { keys: ['Ctrl', 'D'], action: 'Deselect selections' },
             { keys: ['Delete'], action: 'Remove selected songs' },
             { keys: ['Shift', '↑'], action: 'Play selected next' },
         ],
