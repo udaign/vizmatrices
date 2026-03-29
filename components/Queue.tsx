@@ -342,7 +342,7 @@ const Queue: React.FC<QueueProps> = ({
             >
                 <div 
                     ref={panelRef}
-                    className={`fixed inset-x-0 bottom-0 top-16 border-t flex flex-col ${isDark ? 'border-white/10 bg-black/60' : 'border-black/10 bg-white/60'}`}
+                    className={`fixed inset-x-0 bottom-[85px] top-16 border-t flex flex-col ${isDark ? 'border-white/10 bg-black/60' : 'border-black/10 bg-white/60'}`}
                     style={{ backdropFilter: `blur(25px)`, WebkitBackdropFilter: `blur(25px)` }}
                     onClick={(e) => e.stopPropagation()}
                 >
@@ -353,7 +353,7 @@ const Queue: React.FC<QueueProps> = ({
             {/* Desktop View */}
             <div
                 ref={panelRef}
-                className={`hidden lg:fixed lg:top-[57px] lg:bottom-[41px] lg:right-0 lg:w-[calc((100vw-2rem)/3)] lg:flex flex-col border-l z-50 ${isDark ? 'border-white/10 bg-black/60' : 'border-black/10 bg-white/60'}`}
+                className={`hidden lg:fixed lg:top-[57px] lg:bottom-[85px] lg:right-0 lg:w-[calc((100vw-2rem)/3)] lg:flex flex-col border-l z-50 ${isDark ? 'border-white/10 bg-black/60' : 'border-black/10 bg-white/60'}`}
                 style={{ backdropFilter: `blur(25px)`, WebkitBackdropFilter: `blur(25px)` }}
             >
                 {panelContent}
