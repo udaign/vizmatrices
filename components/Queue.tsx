@@ -59,6 +59,29 @@ const Queue: React.FC<QueueProps> = ({
     const searchInputRef = useRef<HTMLInputElement>(null);
     const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
+    const [showScrollBottom, setShowScrollBottom] = useState(false);
+
+    const handleScroll = useCallback(() => {
+        if (!listRef.current) return;
+        const { scrollTop, scrollHeight, clientHeight } = listRef.current;
+        const isScrollable = scrollHeight > clientHeight;
+        const isNotAtBottom = scrollHeight - Math.ceil(scrollTop) - clientHeight > 20;
+        setShowScrollBottom(isScrollable && isNotAtBottom);
+    }, []);
+
+    useEffect(() => {
+        if (isOpen) {
+            const timer = setTimeout(handleScroll, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen, playlist.length, handleScroll]);
+
+    const scrollToBottom = () => {
+        if (listRef.current) {
+            listRef.current.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
+        }
+    };
+
     // Compute matching playlist indices (searches name, artist, album)
     const matchingIndices = useMemo(() => {
         if (!searchQuery.trim()) return [] as number[];
@@ -308,7 +331,7 @@ const Queue: React.FC<QueueProps> = ({
                 )}
             </div>
             {/* List */}
-            <div ref={listRef} className="overflow-y-auto" onDragEnd={handleDragEnd}>
+            <div ref={listRef} className="overflow-y-auto" onScroll={handleScroll} onDragEnd={handleDragEnd}>
                 {playlist.map((track, index) => (
                     <div key={track.url} ref={(el) => setItemRef(index, el)}>
                         <QueueItem
@@ -328,6 +351,16 @@ const Queue: React.FC<QueueProps> = ({
                     </div>
                 ))}
             </div>
+            {showScrollBottom && (
+                <button
+                    onClick={scrollToBottom}
+                    className={`absolute bottom-6 right-6 w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-all animate-fade-in z-20 border ${isDark ? 'bg-black/80 border-white/20 text-white hover:bg-white/10' : 'bg-white/80 border-black/20 text-black hover:bg-black/10'}`}
+                    style={{ backdropFilter: `blur(12px)`, WebkitBackdropFilter: `blur(12px)` }}
+                    aria-label="Scroll to bottom"
+                >
+                    <span className="material-symbols-rounded">arrow_downward</span>
+                </button>
+            )}
         </>
     );
 
