@@ -12,6 +12,9 @@ interface AudioPlayerProps {
   playlistLength: number;
   theme: 'dark' | 'light';
   onThemeToggle: () => void;
+  audioSourceMode: 'file' | 'system';
+  onSystemAudioCapture: () => void;
+  onStopSystemAudio: () => void;
 }
 
 const formatTrackName = (name: string | null): string => {
@@ -24,7 +27,8 @@ const formatTrackName = (name: string | null): string => {
 };
 
 const AudioPlayer: React.FC<AudioPlayerProps> = ({ 
-    onFilesSelect, currentTrackName, currentTrackTitle, albumArtUrl, playlistLength, theme, onThemeToggle
+    onFilesSelect, currentTrackName, currentTrackTitle, albumArtUrl, playlistLength, theme, onThemeToggle,
+    audioSourceMode, onSystemAudioCapture, onStopSystemAudio
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -61,17 +65,36 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       {/* Top Bar */}
       <div className="w-full py-2" role="region" aria-label="Audio Player Header">
         <div className="flex items-center justify-between gap-4">
-            <div className={`flex items-center gap-3 min-w-0 ${playlistLength > 0 ? 'opacity-100' : 'opacity-0'}`}>
-                <div className={`w-10 h-10 rounded-md ${isDark ? 'bg-gray-800' : 'bg-gray-200'} flex-shrink-0 overflow-hidden flex items-center justify-center`}>
-                    {albumArtUrl ? (
-                        <img src={albumArtUrl} alt="Album Art" className="w-full h-full object-cover" />
-                    ) : (
-                        <span className={`material-symbols-rounded text-3xl ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>music_note</span>
-                    )}
-                </div>
-                <p className={`min-w-0 text-sm truncate ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
-                    {currentTrackTitle || formatTrackName(currentTrackName)}
-                </p>
+            <div className={`flex items-center gap-3 min-w-0 ${(playlistLength > 0 || audioSourceMode === 'system') ? 'opacity-100' : 'opacity-0'}`}>
+                {audioSourceMode === 'system' ? (
+                    /* System Audio indicator */
+                    <>
+                        <div className={`w-10 h-10 rounded-md ${isDark ? 'bg-brand-accent/20' : 'bg-brand-accent/10'} flex-shrink-0 overflow-hidden flex items-center justify-center`}>
+                            <span className="material-symbols-rounded text-2xl text-brand-accent">surround_sound</span>
+                        </div>
+                        <div className="flex items-center gap-2 min-w-0">
+                            <p className={`text-sm font-medium truncate ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>System Audio</p>
+                            <span className="relative flex h-2 w-2 flex-shrink-0">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-accent"></span>
+                            </span>
+                        </div>
+                    </>
+                ) : (
+                    /* Normal file track display */
+                    <>
+                        <div className={`w-10 h-10 rounded-md ${isDark ? 'bg-gray-800' : 'bg-gray-200'} flex-shrink-0 overflow-hidden flex items-center justify-center`}>
+                            {albumArtUrl ? (
+                                <img src={albumArtUrl} alt="Album Art" className="w-full h-full object-cover" />
+                            ) : (
+                                <span className={`material-symbols-rounded text-3xl ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>music_note</span>
+                            )}
+                        </div>
+                        <p className={`min-w-0 text-sm truncate ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                            {currentTrackTitle || formatTrackName(currentTrackName)}
+                        </p>
+                    </>
+                )}
             </div>
 
             <div className="flex flex-shrink-0 items-center gap-2">
@@ -103,6 +126,14 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                           >
                               <span className="material-symbols-rounded text-xl">folder_open</span>
                               <span>Select Folder</span>
+                          </button>
+                          <div className={`my-1 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}></div>
+                          <button
+                              onClick={() => { onSystemAudioCapture(); setShowLoadOptions(false); }}
+                              className={`w-full text-left px-4 py-2 text-sm transition-colors flex items-center gap-3 ${theme === 'dark' ? 'text-gray-200 hover:bg-brand-accent/20' : 'text-gray-800 hover:bg-brand-accent/10'}`}
+                          >
+                              <span className="material-symbols-rounded text-xl">surround_sound</span>
+                              <span>System Audio</span>
                           </button>
                       </div>
                   )}

@@ -60,6 +60,7 @@ const defaultSleepTimerState: SleepTimerState = {
 
 type Theme = 'dark' | 'light';
 type Engine = 'Ripple' | 'Shooter';
+type AudioSourceMode = 'file' | 'system';
 
 const getInitialTheme = (): Theme => {
   const savedTheme = localStorage.getItem('theme') as Theme;
@@ -118,6 +119,7 @@ const App: React.FC = () => {
   const [pipEnabled, setPipEnabled] = useState(false);
   const [pipSupported, setPipSupported] = useState(false);
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
+  const [audioSourceMode, setAudioSourceMode] = useState<AudioSourceMode>('file');
   
   // State lifted up from engines for shared visualizers
   const [renderBuffer, setRenderBuffer] = useState<Float32Array | null>(null);
@@ -152,6 +154,8 @@ const App: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const gainNodesRef = useRef<{ bass: GainNode; mids: GainNode; highs: GainNode; } | null>(null);
+  const systemStreamRef = useRef<MediaStream | null>(null);
+  const systemSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
 
   // Refs for audio analysis
   const lastTriggerTime = useRef({ bass: 0 });
@@ -452,6 +456,163 @@ const App: React.FC = () => {
       mids: midAnalyser,
       highs: highAnalyser,
     });
+  };
+
+  const setupSystemAudioContext = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true, // Required by the API spec
+        audio: {
+          // @ts-ignore - systemAudio is a newer constraint not yet in all TS types
+          suppressLocalAudioPlayback: false,
+        },
+        // @ts-ignore
+        systemAudio: 'include',
+      });
+
+      // Discard the video track immediately — we only need audio
+      stream.getVideoTracks().forEach(track => track.stop());
+
+      const audioTracks = stream.getAudioTracks();
+      if (audioTracks.length === 0) {
+        console.warn('No audio track was shared. User may not have checked "Share system audio".');
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+
+      // If there's an existing file-based audio context, pause file playback
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+
+      // Create a fresh AudioContext for system audio
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+      const source = audioContext.createMediaStreamSource(stream);
+      systemSourceRef.current = source;
+      systemStreamRef.current = stream;
+
+      const streamDestination = audioContext.createMediaStreamDestination();
+      setAudioStream(streamDestination.stream);
+
+      const configureAnalyser = (analyser: AnalyserNode) => {
+        analyser.fftSize = 2048;
+        analyser.minDecibels = -100;
+        analyser.maxDecibels = 0;
+      };
+
+      const bassFilter = audioContext.createBiquadFilter();
+      bassFilter.type = 'lowpass';
+      bassFilter.frequency.value = 250;
+      const bassAnalyser = audioContext.createAnalyser();
+      configureAnalyser(bassAnalyser);
+
+      const midFilter = audioContext.createBiquadFilter();
+      midFilter.type = 'bandpass';
+      midFilter.frequency.value = (250 + 4000) / 2;
+      midFilter.Q.value = 0.7;
+      const midAnalyser = audioContext.createAnalyser();
+      configureAnalyser(midAnalyser);
+
+      const highFilter = audioContext.createBiquadFilter();
+      highFilter.type = 'highpass';
+      highFilter.frequency.value = 4000;
+      const highAnalyser = audioContext.createAnalyser();
+      configureAnalyser(highAnalyser);
+
+      const bassGain = audioContext.createGain();
+      const midsGain = audioContext.createGain();
+      const highsGain = audioContext.createGain();
+      gainNodesRef.current = { bass: bassGain, mids: midsGain, highs: highsGain };
+
+      bassGain.gain.value = frequencyMute.bass ? 1 : 0;
+      midsGain.gain.value = frequencyMute.mids ? 1 : 0;
+      highsGain.gain.value = frequencyMute.highs ? 1 : 0;
+
+      // Connect source to filters
+      source.connect(bassFilter);
+      source.connect(midFilter);
+      source.connect(highFilter);
+
+      // Connect filters to gain nodes
+      bassFilter.connect(bassGain);
+      midFilter.connect(midsGain);
+      highFilter.connect(highsGain);
+
+      // Connect gain nodes to analysers (for visualization)
+      // NOTE: We do NOT connect to audioContext.destination to avoid echo.
+      // The system audio is already playing through speakers.
+      bassGain.connect(bassAnalyser);
+      midsGain.connect(midAnalyser);
+      highsGain.connect(highAnalyser);
+
+      // Connect gain nodes to the stream destination for PiP
+      bassGain.connect(streamDestination);
+      midsGain.connect(streamDestination);
+      highsGain.connect(streamDestination);
+
+      // Keep PiP stream alive with a silent oscillator
+      const silentGain = audioContext.createGain();
+      silentGain.gain.value = 0;
+      const oscillator = audioContext.createOscillator();
+      oscillator.frequency.value = 20;
+      oscillator.connect(silentGain);
+      silentGain.connect(streamDestination);
+      oscillator.start();
+
+      // Store the new context (replace any file-based one)
+      audioContextRef.current = audioContext;
+      setSampleRate(audioContext.sampleRate);
+
+      setAnalysers({
+        bass: bassAnalyser,
+        mids: midAnalyser,
+        highs: highAnalyser,
+      });
+
+      setAudioSourceMode('system');
+      setIsPlaying(true);
+
+      trackEvent('system_audio_capture_start');
+
+      // Auto-cleanup when the user stops sharing via browser UI
+      audioTracks[0].addEventListener('ended', () => {
+        stopSystemAudio();
+      });
+    } catch (error: any) {
+      // User cancelled the dialog or permission was denied
+      if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
+        console.error('Error capturing system audio:', error);
+      }
+    }
+  };
+
+  const stopSystemAudio = () => {
+    // Stop all tracks on the captured stream
+    if (systemStreamRef.current) {
+      systemStreamRef.current.getTracks().forEach(track => track.stop());
+      systemStreamRef.current = null;
+    }
+
+    // Disconnect the source node
+    if (systemSourceRef.current) {
+      systemSourceRef.current.disconnect();
+      systemSourceRef.current = null;
+    }
+
+    // Close the system audio context
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+
+    setAnalysers(null);
+    setAudioSourceMode('file');
+    setIsPlaying(false);
+    setAudioStream(null);
+    gainNodesRef.current = null;
+
+    trackEvent('system_audio_capture_stop');
   };
 
   const handleFilesSelect = (files: FileList, method: 'file_select' | 'folder_select') => {
@@ -1299,12 +1460,40 @@ const App: React.FC = () => {
                 playlistLength={playlist.length}
                 theme={theme}
                 onThemeToggle={toggleTheme}
+                audioSourceMode={audioSourceMode}
+                onSystemAudioCapture={setupSystemAudioContext}
+                onStopSystemAudio={stopSystemAudio}
             />
         </div>
       </header>
 
       {/* Floating Player Controls */}
-      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-4">
+      <div className={`fixed left-1/2 -translate-x-1/2 z-[70] flex items-center gap-4 ${audioSourceMode === 'system' ? 'bottom-14' : 'bottom-24'}`}>
+        {audioSourceMode === 'system' ? (
+          /* System Audio Stop Pill */
+          <div className={`relative w-fit shadow-2xl ${isDark ? 'shadow-black/50' : 'shadow-gray-400/50'} rounded-full border ${isDark ? 'border-white/10' : 'border-black/10'}`}>
+              <div className={`absolute inset-0 rounded-full ${isDark ? 'bg-black/60' : 'bg-white/60'}`}></div>
+              <div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                      backdropFilter: `blur(25px)`,
+                      WebkitBackdropFilter: `blur(25px)`,
+                  }}
+              ></div>
+              <div className="relative z-10 flex items-center h-14">
+                  <button
+                      onClick={stopSystemAudio}
+                      className={`flex items-center gap-2 px-6 h-full rounded-full transition-colors focus:outline-none ${isDark ? 'text-white hover:text-brand-accent' : 'text-gray-800 hover:text-brand-accent'}`}
+                      aria-label="Stop system audio capture"
+                  >
+                      <span className="material-symbols-rounded text-2xl">stop</span>
+                      <span className="text-sm font-semibold">Stop</span>
+                  </button>
+              </div>
+          </div>
+        ) : (
+          /* Normal File Playback Controls */
+          <>
           {hasPlaylist && (
               <div className={`relative w-14 h-14 shadow-2xl ${isDark ? 'shadow-black/50' : 'shadow-gray-400/50'} rounded-full border ${isDark ? 'border-white/10' : 'border-black/10'}`}>
                   <div className={`absolute inset-0 rounded-full ${isDark ? 'bg-black/60' : 'bg-white/60'}`}></div>
@@ -1396,9 +1585,11 @@ const App: React.FC = () => {
                   repeatMode={repeat}
               />
           )}
+          </>
+        )}
       </div>
       
-      {/* Full-width Progress Bar */}
+      {/* Full-width Footer */}
       <div 
           className={`fixed bottom-0 left-0 right-0 z-[60] border-t ${isDark ? 'bg-black/60 border-white/10' : 'bg-white/60 border-black/10'}`}
           style={{
@@ -1406,6 +1597,8 @@ const App: React.FC = () => {
               WebkitBackdropFilter: `blur(25px)`,
           }}
       >
+          {/* Progress Bar — only shown in file mode */}
+          {audioSourceMode !== 'system' && (
           <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center gap-3 py-3">
                   <span className={`font-mono text-sm w-12 ${isDark ? 'text-gray-400' : 'text-gray-600'} text-center`} aria-live="polite">{formatTime(currentTime)}</span>
@@ -1423,8 +1616,9 @@ const App: React.FC = () => {
                   <span className={`font-mono text-sm w-12 ${isDark ? 'text-gray-400' : 'text-gray-600'} text-center`}>{formatTime(isNaN(duration) ? 0 : duration)}</span>
               </div>
           </div>
+          )}
           
-          <div className={`border-t ${isDark ? 'border-white/10' : 'border-black/10'}`}>
+          <div className={`${audioSourceMode !== 'system' ? `border-t ${isDark ? 'border-white/10' : 'border-black/10'}` : ''}`}>
               <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                   <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} flex items-center justify-center`}>
                       <p className="flex items-center justify-center flex-wrap gap-x-3">
