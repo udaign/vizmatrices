@@ -1439,7 +1439,7 @@ const App: React.FC = () => {
           theme={theme}
           pipEnabled={pipEnabled}
           isPlaying={isPlaying}
-          hasPlaylist={hasPlaylist}
+          hasAudioSource={hasPlaylist || audioSourceMode === 'system'}
           onPipEnabledChange={setPipEnabled}
           audioStream={audioStream}
       />

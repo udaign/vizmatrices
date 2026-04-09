@@ -30,7 +30,7 @@ interface PipRendererProps {
     theme: 'dark' | 'light';
     pipEnabled: boolean;
     isPlaying: boolean;
-    hasPlaylist: boolean;
+    hasAudioSource: boolean;
     onPipEnabledChange: (enabled: boolean) => void;
     audioStream: MediaStream | null;
 }
@@ -41,7 +41,7 @@ const PipRenderer: React.FC<PipRendererProps> = ({
     theme,
     pipEnabled,
     isPlaying,
-    hasPlaylist,
+    hasAudioSource,
     onPipEnabledChange,
     audioStream,
 }) => {
@@ -195,7 +195,7 @@ const PipRenderer: React.FC<PipRendererProps> = ({
 
     // Effect to manage PiP window based on the pipEnabled toggle
     useEffect(() => {
-        const canEnterPip = isPipSupported && hasPlaylist;
+        const canEnterPip = isPipSupported && hasAudioSource;
 
         if (pipEnabled && canEnterPip) {
             enterPip();
@@ -208,7 +208,7 @@ const PipRenderer: React.FC<PipRendererProps> = ({
         if (pipEnabled && !canEnterPip) {
             onPipEnabledChange(false);
         }
-    }, [pipEnabled, hasPlaylist, isPipSupported, enterPip, exitPip, onPipEnabledChange]);
+    }, [pipEnabled, hasAudioSource, isPipSupported, enterPip, exitPip, onPipEnabledChange]);
     
     // Effect to handle user closing PiP window, which should update the toggle state
     useEffect(() => {
